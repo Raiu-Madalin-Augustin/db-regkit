@@ -1,0 +1,41 @@
+name: CI
+
+on: [push, pull_request]
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest          # runner conține deja Docker Engine :contentReference[oaicite:7]{index=7}
+    services:                       # opțional: service container dacă vrei Docker in Docker
+      docker:
+        image: docker:26-dind
+        privileged: true
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5   # rulează conda/py instalația :contentReference[oaicite:8]{index=8}
+        with:
+          python-version: '3.12'
+
+      - name: Restore pip cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('requirements.txt') }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run tests with pytest
+        env:
+          PYTHONPATH: src
+        run: pytest -v
+
+      - name: Upload test reports
+        if: success() || failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: pytest-report
+          path: .pytest_cache
