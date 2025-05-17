@@ -1,0 +1,4 @@
+test_pg_connection:
+  tables:
+    - pg_catalog.pg_version
+  procs: []

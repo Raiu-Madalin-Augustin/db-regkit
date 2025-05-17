@@ -1,0 +1,7 @@
+tables:
+- orders
+- users
+columns:
+- users.email
+procs:
+- calculate_discount
